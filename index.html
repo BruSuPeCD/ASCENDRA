@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCENDRA</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header id="app-header">
+        <section id="metrics-panel">
+            <div class="metric">
+                <span class="metric-title">Nivel</span>
+                <strong id="level-value">0</strong>
+            </div>
+            <div class="metric">
+                <span class="metric-title">Forma (7 días)</span>
+                <strong id="form-value">--</strong>
+            </div>
+        </section>
+        
+        <div id="controls-panel">
+            <button type="button" id="btn-import">Importar JSON</button>
+            <button type="button" id="btn-export">Exportar JSON</button>
+        </div>
+    </header>
+    
+    <main id="habits-container">
+        <!-- La lista de hábitos se construirá aquí en el paso 1.3 -->
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
