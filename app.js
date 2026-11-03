@@ -65,3 +65,55 @@ function exportarDatos() {
   
   URL.revokeObjectURL(url);
 }
+
+
+/**
+ * Solicita al usuario un archivo JSON, lee su contenido y restaura la base de datos local.
+ */
+function importarDatos() {
+  // 1. Crear un input de archivo invisible en el DOM
+  const inputArchivo = document.createElement('input');
+  inputArchivo.type = 'file';
+  inputArchivo.accept = '.json';
+
+  // 2. Escuchar el evento cuando el usuario selecciona el archivo
+  inputArchivo.addEventListener('change', function(evento) {
+    const archivo = evento.target.files[0];
+    
+    // Si el usuario cancela la ventana de selección, detenemos la ejecución
+    if (!archivo) {
+      return; 
+    }
+
+    // 3. Instanciar FileReader para leer el documento físico
+    const lector = new FileReader();
+    
+    // 4. Definir qué hacer cuando el archivo termine de leerse
+    lector.onload = function(e) {
+      try {
+        // Desempaquetar el texto plano a un objeto JavaScript
+        const datosImportados = JSON.parse(e.target.result);
+        
+        // 5. Validación estructural estricta
+        if (!datosImportados.app_config || !datosImportados.user_state || !datosImportados.habits) {
+          throw new Error("El archivo seleccionado no tiene el formato maestro de ASCENDRA.");
+        }
+
+        // 6. Sobrescribir la memoria y recargar
+        guardarDatos(datosImportados);
+        alert("Copia de seguridad restaurada con éxito. La aplicación se reiniciará.");
+        location.reload(); 
+
+      } catch (error) {
+        console.error("Fallo de integridad:", error);
+        alert("Error al importar: " + error.message);
+      }
+    };
+
+    // 7. Ordenar al lector que procese el archivo como texto
+    lector.readAsText(archivo);
+  });
+
+  // 8. Simular el clic del usuario para abrir el explorador de archivos
+  inputArchivo.click();
+}
