@@ -12,9 +12,9 @@ Este documento define la secuencia estricta de desarrollo. Identifica el primer 
 *Objetivo: Construir la "carcasa" visual de la aplicación. En esta fase los botones no hacen nada.*
 - [x] 1.1. Crear estructura de carpetas y archivos base (`index.html`, `style.css`, `app.js`).
 - [x] 1.2. Programar el HTML estático de la cabecera (Métricas de Nivel, Forma y Botón Exportar).
-- [ ] 1.3. Programar el HTML estático de la lista de hábitos (Checkboxes, inputs numéricos).
-- [ ] 1.4. Programar el HTML del botón "Cerrar Día".
-- [ ] 1.5. Dar estilo a la interfaz con CSS (Diseño claro, minimalista, modo claro).
+- [x] 1.3. Programar el HTML estático de la lista de hábitos (Checkboxes, inputs numéricos).
+- [x] 1.4. Programar el HTML del botón "Cerrar Día".
+- [x] 1.5. Dar estilo a la interfaz con CSS (Diseño claro, minimalista, modo claro).
 
 ## FASE 2: Cimientos de Datos (JavaScript Base)
 *Objetivo: Preparar la memoria del navegador y asegurar que los datos no se pierdan.*
