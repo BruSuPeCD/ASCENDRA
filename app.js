@@ -117,3 +117,82 @@ function importarDatos() {
   // 8. Simular el clic del usuario para abrir el explorador de archivos
   inputArchivo.click();
 }
+
+/**
+ * Lee el array de hábitos del estado local y construye dinámicamente
+ * las tarjetas HTML correspondientes en el DOM.
+ */
+function renderizarHabitos() {
+  // 1. Cargar el estado actual desde LocalStorage
+  const datos = leerDatos();
+  const catalogoHabitos = datos.habits;
+
+  // 2. Localizar el contenedor principal y el botón de cierre en el HTML
+  const contenedor = document.getElementById('habits-container');
+  const botonCerrar = document.getElementById('btn-close-day');
+
+  // 3. Limpiar las tarjetas antiguas de la pantalla sin borrar el botón
+  const tarjetasAntiguas = contenedor.querySelectorAll('.habit-card');
+  tarjetasAntiguas.forEach(tarjeta => tarjeta.remove());
+
+  // 4. Bucle: Por cada hábito en el JSON, construir su representación visual
+  catalogoHabitos.forEach(habito => {
+    // 4a. Crear la tarjeta contenedora <article>
+    const article = document.createElement('article');
+    article.className = 'habit-card';
+
+    // 4b. Crear la etiqueta descriptiva <label>
+    const label = document.createElement('label');
+    label.htmlFor = habito.id;
+    label.className = 'habit-name';
+    // Muestra el nombre y los puntos absolutos asignados en la configuración
+    label.textContent = `${habito.name} (${habito.base_xp > 0 ? '+' : ''}${habito.base_xp} XP)`;
+
+    // 4c. Crear el control interactivo <input>
+    const input = document.createElement('input');
+    input.id = habito.id; // Vincula el input con el label mediante el ID único
+
+    // 4d. Configurar el tipo de input basándose en el esquema JSON
+    if (habito.type === 'quantifiable') {
+      input.type = 'number';
+      input.className = 'habit-input-number';
+      input.min = '0';
+      input.placeholder = '0';
+    } else {
+      input.type = 'checkbox';
+      input.className = 'habit-input-check';
+    }
+
+    // 4e. Ensamblar las piezas dentro de la tarjeta
+    article.appendChild(label);
+    article.appendChild(input);
+
+    // 4f. Inyectar la tarjeta completa en la pantalla, justo antes del botón "Cerrar Día"
+    contenedor.insertBefore(article, botonCerrar);
+  });
+}
+
+/**
+ * Lee el estado del usuario del JSON y actualiza los medidores de Nivel y Forma en la cabecera.
+ */
+function renderizarMetricas() {
+  // 1. Cargar el estado actual desde LocalStorage
+  const datos = leerDatos();
+  const estadoUsuario = datos.user_state;
+  
+  // 2. Extraer el valor del Nivel (historical_xp)
+  const nivel = estadoUsuario.historical_xp;
+
+  // 3. Localizar el elemento HTML del Nivel mediante su ID e inyectar el valor
+  const elementoNivel = document.getElementById('level-value');
+  elementoNivel.textContent = nivel;
+  
+  // 4. (Opcional por ahora) Preparar el elemento de Forma para el futuro
+  const elementoForma = document.getElementById('form-value');
+  elementoForma.textContent = "--"; // Se calculará dinámicamente en la Fase 5
+}
+
+
+// Renderizado inicial al cargar la aplicación
+renderizarMetricas();
+renderizarHabitos();
