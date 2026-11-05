@@ -28,6 +28,9 @@ function guardarDatos(datos) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
 }
 
+// Memoria volátil para almacenar los registros del día antes del cierre
+const memoriaDiaActual = {};
+
 
 /**
  * Lee los datos guardados en LocalStorage. Si no existen, invoca la plantilla inicial.
@@ -162,6 +165,23 @@ function renderizarHabitos() {
       input.type = 'checkbox';
       input.className = 'habit-input-check';
     }
+
+    // Asignar Event Listener para capturar la interacción del usuario
+    input.addEventListener('change', (evento) => {
+      const elementoInteractuado = evento.target;
+      const idHabito = elementoInteractuado.id;
+      let valorRegistrado;
+
+      // Evaluar el tipo de input basándose en las restricciones del MVP
+      if (elementoInteractuado.type === 'checkbox') {
+        valorRegistrado = elementoInteractuado.checked ? 1 : 0;
+      } else {
+        valorRegistrado = parseFloat(elementoInteractuado.value) || 0;
+      }
+
+      // Guardar el valor en la memoria temporal del día
+      memoriaDiaActual[idHabito] = valorRegistrado;
+    });
 
     // 4e. Ensamblar las piezas dentro de la tarjeta
     article.appendChild(label);

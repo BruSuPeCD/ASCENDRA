@@ -26,13 +26,13 @@ Este documento define la secuencia estricta de desarrollo. Identifica el primer 
 
 ## FASE 3: Conexión UI-Datos (Renderizado)
 *Objetivo: Que el HTML se dibuje automáticamente leyendo los datos del JSON, no con texto escrito a mano.*
-- [ ] 3.1. Borrar los hábitos estáticos del HTML.
-- [ ] 3.2. Programar función en JS que lea el array `habits` del JSON y construya dinámicamente el HTML de cada hábito según su tipo (check o cuantificable).
-- [ ] 3.3. Mostrar correctamente los valores de Nivel Histórico leyendo del JSON.
+- [x] 3.1. Borrar los hábitos estáticos del HTML.
+- [x] 3.2. Programar función en JS que lea el array `habits` del JSON y construya dinámicamente el HTML de cada hábito según su tipo (check o cuantificable).
+- [x] 3.3. Mostrar correctamente los valores de Nivel Histórico leyendo del JSON.
 
 ## FASE 4: El Motor de Interacción Diario
 *Objetivo: Dar vida a los botones y aplicar las matemáticas.*
-- [ ] 4.1. Programar eventos de clic en los hábitos (marcar check, introducir número). Esto debe guardar el valor temporalmente en la memoria del día actual.
+- [x] 4.1. Programar eventos de clic en los hábitos (marcar check, introducir número). Esto debe guardar el valor temporalmente en la memoria del día actual.
 - [ ] 4.2. Implementar la lógica del botón "Cerrar Día": Cambiar el estado `is_closed` a `true`.
 - [ ] 4.3. Motor Matemático: Al cerrar el día, calcular la XP de cada registro aplicando los topes (ej. `Math.min(..., 1.5)`).
 - [ ] 4.4. Congelar la `xp_awarded` en el array `daily_logs` y guardar en LocalStorage.
