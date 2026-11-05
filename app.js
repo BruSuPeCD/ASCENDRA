@@ -216,3 +216,48 @@ function renderizarMetricas() {
 // Renderizado inicial al cargar la aplicación
 renderizarMetricas();
 renderizarHabitos();
+
+
+/**
+ * Consolida la memoria volátil del día actual en la base de datos local
+ * y cambia el estado is_closed a true dentro del historial daily_logs.
+ */
+function cerrarDia() {
+  // 1. Cargar el estado actual completo desde LocalStorage
+  const datos = leerDatos();
+
+  // 2. Extraer la fecha local del sistema en formato YYYY-MM-DD
+  const fechaHoy = new Date().toISOString().split("T")[0];
+
+  // 3. Transformar la memoria volátil en la lista de registros del día
+  const registrosDelDia = Object.keys(memoriaDiaActual).map((idHabito) => {
+    return {
+      habit_id: idHabito,
+      value_recorded: memoriaDiaActual[idHabito],
+      xp_awarded: 0 // Valor provisional; se congelará en el paso 4.3
+    };
+  });
+
+  // 4. Construir el objeto de registro diario respetando el esquema JSON maestro
+  const nuevoLogDiario = {
+    id: generarUUID(),
+    local_date: fechaHoy,
+    is_closed: true,
+    daily_xp_generated: 0, // Valor provisional; se calculará en la Fase 5
+    records: registrosDelDia
+  };
+
+  // 5. Inyectar el registro en el array daily_logs de la base de datos
+  datos.daily_logs.push(nuevoLogDiario);
+
+  // 6. Persistir el nuevo estado en LocalStorage
+  guardarDatos(datos);
+
+  // 7. Vaciar la memoria volátil para el próximo ciclo
+  for (const clave in memoriaDiaActual) {
+    delete memoriaDiaActual[clave];
+  }
+}
+
+// Asignar el escuchador de eventos de clic al botón de cierre
+document.getElementById('btn-close-day').addEventListener('click', cerrarDia);
