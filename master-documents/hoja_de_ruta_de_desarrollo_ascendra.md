@@ -33,16 +33,16 @@ Este documento define la secuencia estricta de desarrollo. Identifica el primer 
 ## FASE 4: El Motor de Interacción Diario
 *Objetivo: Dar vida a los botones y aplicar las matemáticas.*
 - [x] 4.1. Programar eventos de clic en los hábitos (marcar check, introducir número). Esto debe guardar el valor temporalmente en la memoria del día actual.
-- [ ] 4.2. Implementar la lógica del botón "Cerrar Día": Cambiar el estado `is_closed` a `true`.
-- [ ] 4.3. Motor Matemático: Al cerrar el día, calcular la XP de cada registro aplicando los topes (ej. `Math.min(..., 1.5)`).
-- [ ] 4.4. Congelar la `xp_awarded` en el array `daily_logs` y guardar en LocalStorage.
+- [x] 4.2. Implementar la lógica del botón "Cerrar Día": Cambiar el estado `is_closed` a `true`.
+- [x] 4.3. Motor Matemático: Al cerrar el día, calcular la XP de cada registro aplicando los topes (ej. `Math.min(..., 1.5)`).
+- [x] 4.4. Congelar la `xp_awarded` en el array `daily_logs` y guardar en LocalStorage.
 
 ## FASE 5: Progresión y Estadísticas Básicas
 *Objetivo: Calcular el impacto de las acciones y reflejarlo en los medidores.*
-- [ ] 5.1. Calcular nuevo Nivel: Sumar toda la XP positiva generada hoy al `historical_xp`.
-- [ ] 5.2. Calcular Forma: Crear función que recorra los últimos 7 días con `is_closed: true` y calcule la media móvil del `daily_xp_generated`.
-- [ ] 5.3. Actualizar la cabecera del DOM (HTML) con los nuevos cálculos tras cerrar el día.
-- [ ] 5.4. Lógica de "Cambio de día": Detectar cuándo la hora local supera la `cutoff_time` (ej. 04:00 AM) para limpiar la pantalla y empezar un nuevo registro diario.
+- [x] 5.1. Calcular nuevo Nivel: Sumar toda la XP positiva generada hoy al `historical_xp`.
+- [x] 5.2. Calcular Forma: Crear función que recorra los últimos 7 días con `is_closed: true` y calcule la media móvil del `daily_xp_generated`.
+- [x] 5.3. Actualizar la cabecera del DOM (HTML) con los nuevos cálculos tras cerrar el día.
+- [x] 5.4. Lógica de "Cambio de día": Detectar cuándo la hora local supera la `cutoff_time` (ej. 04:00 AM) para limpiar la pantalla y empezar un nuevo registro diario.
 
 ## FASE 6: Refinamiento del MVP
 *Objetivo: Pulir la experiencia de uso antes de dar el proyecto por cerrado.*

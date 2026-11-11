@@ -193,7 +193,8 @@ function renderizarHabitos() {
 }
 
 /**
- * Lee el estado del usuario del JSON y actualiza los medidores de Nivel y Forma en la cabecera.
+ * Lee el estado del usuario y el historial de logs del JSON para actualizar 
+ * dinámicamente los medidores de Nivel y Forma en la cabecera.
  */
 function renderizarMetricas() {
   // 1. Cargar el estado actual desde LocalStorage
@@ -207,11 +208,13 @@ function renderizarMetricas() {
   const elementoNivel = document.getElementById('level-value');
   elementoNivel.textContent = nivel;
   
-  // 4. (Opcional por ahora) Preparar el elemento de Forma para el futuro
-  const elementoForma = document.getElementById('form-value');
-  elementoForma.textContent = "--"; // Se calculará dinámicamente en la Fase 5
-}
+  // 4. Calcular el valor actualizado de la Forma pasando el historial de daily_logs
+  const valorForma = calcularForma(datos.daily_logs);
 
+  // 5. Localizar el elemento HTML de la Forma mediante su ID e inyectar el resultado
+  const elementoForma = document.getElementById('form-value');
+  elementoForma.textContent = valorForma;
+}
 
 // Renderizado inicial al cargar la aplicación
 renderizarMetricas();
@@ -219,13 +222,13 @@ renderizarHabitos();
 
 
 /**
- * Consolida la memoria volátil, evalúa la inacción (hábitos omitidos) 
- * y calcula la XP de cada registro aplicando las fórmulas matemáticas.
+ * Consolida la memoria volátil, evalúa la inacción (hábitos omitidos),
+ * calcula la XP de cada registro y actualiza el Nivel histórico con la XP positiva del día.
  */
 function cerrarDia() {
   // 1. Cargar el estado actual desde LocalStorage
   const datos = leerDatos();
-  const fechaHoy = new Date().toISOString().split("T")[0];
+  const fechaHoy = obtenerFechaLogica();
 
   // 2. Cruzar el catálogo maestro de hábitos con la memoria volátil
   const registrosDelDia = datos.habits.map((habito) => {
@@ -257,24 +260,100 @@ function cerrarDia() {
     };
   });
 
-  // 5. Construir el objeto de registro diario
+  // 5. Motor de Progresión (Paso 5.1): Filtrar y sumar únicamente la XP positiva generada hoy
+  const xpPositivaHoy = registrosDelDia.reduce((acumulado, registro) => {
+    return registro.xp_awarded > 0 ? acumulado + registro.xp_awarded : acumulado;
+  }, 0);
+
+  // 5.2a. Calcular XP neta total del día (incluyendo penalizaciones)
+  const xpNetaHoy = registrosDelDia.reduce((acumulado, registro) => acumulado + registro.xp_awarded, 0);
+
+  // 6. Incrementar el Nivel histórico irreversible en la base de datos
+  datos.user_state.historical_xp += xpPositivaHoy;
+
+  // 7. Construir el objeto de registro diario
   const nuevoLogDiario = {
     id: generarUUID(),
     local_date: fechaHoy,
     is_closed: true,
-    daily_xp_generated: 0, // Valor provisional; se calculará en la Fase 5
+    daily_xp_generated: xpNetaHoy, // Se inyecta la XP real calculada
     records: registrosDelDia
   };
 
-  // 6. Persistir en la base de datos
+  // 8. Persistir en la base de datos
   datos.daily_logs.push(nuevoLogDiario);
   guardarDatos(datos);
 
-  // 7. Vaciar la memoria volátil
+  // 9. Vaciar la memoria volátil
   for (const clave in memoriaDiaActual) {
     delete memoriaDiaActual[clave];
   }
+
+  // 10. (Paso 5.3) Actualizar la cabecera del DOM inmediatamente tras el cierre
+  renderizarMetricas();
 }
 
 // Asignar el escuchador de eventos de clic al botón de cierre
 document.getElementById('btn-close-day').addEventListener('click', cerrarDia);
+
+/**
+ * Calcula la media móvil de la Forma evaluando los últimos 7 días válidos.
+ * @param {Array} historialLogs - Array 'daily_logs' extraído del esquema JSON.
+ * @returns {number|string} El valor numérico de la Forma o "--" si no hay registros.
+ */
+function calcularForma(historialLogs) {
+  const diasValidos = historialLogs.filter((log) => log.is_closed === true);
+  
+  if (diasValidos.length === 0) {
+    return "--";
+  }
+
+  const ultimos7Dias = diasValidos.slice(-7);
+  
+  const sumaNeta = ultimos7Dias.reduce((acumulado, log) => acumulado + log.daily_xp_generated, 0);
+  return Math.round(sumaNeta / ultimos7Dias.length);
+}
+
+/**
+ * Calcula la fecha lógica del sistema aislando la hora de corte (cutoff_time).
+ * Evalúa el desfase horario para asignar los registros de madrugada al día anterior.
+ * @returns {string} Fecha ajustada en formato inmutable "YYYY-MM-DD".
+ */
+function obtenerFechaLogica() {
+  const datos = leerDatos();
+  const horaCorte = datos.app_config.cutoff_time; 
+  
+  const fechaNativa = new Date();
+  const fechaLogica = new Date(fechaNativa);
+  
+  const [horasCorte, minutosCorte] = horaCorte.split(':').map(Number);
+  
+  if (fechaNativa.getHours() < horasCorte || (fechaNativa.getHours() === horasCorte && fechaNativa.getMinutes() < minutosCorte)) {
+    fechaLogica.setDate(fechaLogica.getDate() - 1);
+  }
+  
+  return fechaLogica.toISOString().split('T')[0];
+}
+
+/**
+ * Comprueba si la fecha lógica actual ya tiene un registro consolidado.
+ * Si es así, bloquea toda interacción en el DOM para evitar ediciones.
+ */
+function verificarEstadoDia() {
+  const datos = leerDatos();
+  const fechaHoy = obtenerFechaLogica();
+  
+  const diaYaCerrado = datos.daily_logs.some(log => log.local_date === fechaHoy && log.is_closed === true);
+  
+  if (diaYaCerrado) {
+    const inputsHabitos = document.querySelectorAll('.habit-input-number, .habit-input-check');
+    const botonCerrar = document.getElementById('btn-close-day');
+    
+    inputsHabitos.forEach(input => {
+      input.disabled = true;
+    });
+    
+    botonCerrar.disabled = true;
+    botonCerrar.textContent = "Día Cerrado";
+  }
+}
