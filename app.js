@@ -219,26 +219,45 @@ renderizarHabitos();
 
 
 /**
- * Consolida la memoria volátil del día actual en la base de datos local
- * y cambia el estado is_closed a true dentro del historial daily_logs.
+ * Consolida la memoria volátil, evalúa la inacción (hábitos omitidos) 
+ * y calcula la XP de cada registro aplicando las fórmulas matemáticas.
  */
 function cerrarDia() {
-  // 1. Cargar el estado actual completo desde LocalStorage
+  // 1. Cargar el estado actual desde LocalStorage
   const datos = leerDatos();
-
-  // 2. Extraer la fecha local del sistema en formato YYYY-MM-DD
   const fechaHoy = new Date().toISOString().split("T")[0];
 
-  // 3. Transformar la memoria volátil en la lista de registros del día
-  const registrosDelDia = Object.keys(memoriaDiaActual).map((idHabito) => {
+  // 2. Cruzar el catálogo maestro de hábitos con la memoria volátil
+  const registrosDelDia = datos.habits.map((habito) => {
+    // Si el hábito no existe en la memoria transitoria, forzamos un 0 absoluto (inacción)
+    const valorRegistrado = memoriaDiaActual[habito.id] !== undefined ? memoriaDiaActual[habito.id] : 0;
+    let xpCalculada = 0;
+
+    // 3. Motor Matemático: Bifurcación del cálculo de XP según tipo y polaridad
+    if (habito.type === 'quantifiable' && habito.polarity === 'positive') {
+      // Proporcional con tope anti-farmeo
+      const proporcion = valorRegistrado / habito.target;
+      const multiplicadorFinal = Math.min(proporcion, habito.cap_multiplier);
+      xpCalculada = multiplicadorFinal * habito.base_xp;
+      
+    } else if (habito.type === 'quantifiable' && habito.polarity === 'negative') {
+      // Desliz explícito negativo (el base_xp ya es negativo, ej: -1)
+      xpCalculada = valorRegistrado * habito.base_xp;
+      
+    } else {
+      // Hábitos tipo 'check' (1 = cumplido, 0 = inacción o fallo)
+      xpCalculada = valorRegistrado * habito.base_xp;
+    }
+
+    // 4. Devolver el registro empaquetado para este hábito
     return {
-      habit_id: idHabito,
-      value_recorded: memoriaDiaActual[idHabito],
-      xp_awarded: 0 // Valor provisional; se congelará en el paso 4.3
+      habit_id: habito.id,
+      value_recorded: valorRegistrado,
+      xp_awarded: Math.round(xpCalculada) // Redondeo de seguridad para decimales
     };
   });
 
-  // 4. Construir el objeto de registro diario respetando el esquema JSON maestro
+  // 5. Construir el objeto de registro diario
   const nuevoLogDiario = {
     id: generarUUID(),
     local_date: fechaHoy,
@@ -247,13 +266,11 @@ function cerrarDia() {
     records: registrosDelDia
   };
 
-  // 5. Inyectar el registro en el array daily_logs de la base de datos
+  // 6. Persistir en la base de datos
   datos.daily_logs.push(nuevoLogDiario);
-
-  // 6. Persistir el nuevo estado en LocalStorage
   guardarDatos(datos);
 
-  // 7. Vaciar la memoria volátil para el próximo ciclo
+  // 7. Vaciar la memoria volátil
   for (const clave in memoriaDiaActual) {
     delete memoriaDiaActual[clave];
   }
