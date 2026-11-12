@@ -112,3 +112,50 @@ body {
     cursor: pointer;
     margin-top: 10px;
 }
+
+/* Estilos visuales para controles deshabilitados (Paso 6.1) */
+input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #e9ecef;
+}
+
+.disabled-btn {
+    background-color: var(--text-muted) !important;
+    cursor: not-allowed !important;
+    opacity: 0.8;
+}
+
+/* Adaptabilidad Móvil (Responsive Design - Paso 6.2) */
+@media (max-width: 480px) {
+    body {
+        padding: 12px;
+    }
+
+    /* Reestructuración de la cabecera para evitar superposiciones */
+    #app-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    #metrics-panel {
+        justify-content: center;
+    }
+
+    #controls-panel {
+        display: flex;
+        gap: 10px;
+    }
+
+    #controls-panel button {
+        margin-left: 0;
+        flex: 1;
+        padding: 10px;
+    }
+
+    /* Ajustes en las tarjetas de hábitos para pantallas estrechas */
+    .habit-card {
+        padding: 12px 15px;
+    }
+}

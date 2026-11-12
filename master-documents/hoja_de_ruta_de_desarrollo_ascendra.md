@@ -46,6 +46,6 @@ Este documento define la secuencia estricta de desarrollo. Identifica el primer 
 
 ## FASE 6: Refinamiento del MVP
 *Objetivo: Pulir la experiencia de uso antes de dar el proyecto por cerrado.*
-- [ ] 6.1. Implementar estado visual de "Día ya cerrado" (Bloquear inputs para evitar trampas o ediciones posteriores).
-- [ ] 6.2. Asegurar adaptabilidad móvil (Responsive design) en el CSS.
+- [x] 6.1. Implementar estado visual de "Día ya cerrado" (Bloquear inputs para evitar trampas o ediciones posteriores).
+- [x] 6.2. Asegurar adaptabilidad móvil (Responsive design) en el CSS.
 - [ ] 6.3. Testing general de usuario (Buscar bugs y casos límite).

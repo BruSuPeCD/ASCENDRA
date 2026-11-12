@@ -219,6 +219,7 @@ function renderizarMetricas() {
 // Renderizado inicial al cargar la aplicación
 renderizarMetricas();
 renderizarHabitos();
+verificarEstadoDia();
 
 
 /**
@@ -291,6 +292,7 @@ function cerrarDia() {
 
   // 10. (Paso 5.3) Actualizar la cabecera del DOM inmediatamente tras el cierre
   renderizarMetricas();
+  verificarEstadoDia();
 }
 
 // Asignar el escuchador de eventos de clic al botón de cierre
@@ -336,24 +338,32 @@ function obtenerFechaLogica() {
 }
 
 /**
- * Comprueba si la fecha lógica actual ya tiene un registro consolidado.
- * Si es así, bloquea toda interacción en el DOM para evitar ediciones.
+ * Verifica si la fecha lógica actual ya cuenta con un registro cerrado.
+ * Si es así, bloquea los inputs y el botón para impedir ediciones.
  */
 function verificarEstadoDia() {
+  // 1. Cargar el estado actual y aislar la fecha lógica
   const datos = leerDatos();
   const fechaHoy = obtenerFechaLogica();
-  
-  const diaYaCerrado = datos.daily_logs.some(log => log.local_date === fechaHoy && log.is_closed === true);
-  
-  if (diaYaCerrado) {
-    const inputsHabitos = document.querySelectorAll('.habit-input-number, .habit-input-check');
+
+  // 2. Buscar en el historial si el día actual ya está consolidado
+  const diaCerrado = datos.daily_logs.find((log) => log.local_date === fechaHoy && log.is_closed === true);
+
+  if (diaCerrado) {
+    // 3. Localizar todos los controles interactivos generados en el DOM
+    const inputs = document.querySelectorAll('.habit-input-check, .habit-input-number');
     const botonCerrar = document.getElementById('btn-close-day');
-    
-    inputsHabitos.forEach(input => {
+
+    // 4. Bloquear la interactividad de cada input
+    inputs.forEach((input) => {
       input.disabled = true;
     });
-    
-    botonCerrar.disabled = true;
-    botonCerrar.textContent = "Día Cerrado";
+
+    // 5. Bloquear el botón de cierre y aplicar retroalimentación visual
+    if (botonCerrar) {
+      botonCerrar.disabled = true;
+      botonCerrar.textContent = "Día Cerrado";
+      botonCerrar.classList.add('disabled-btn');
+    }
   }
 }
